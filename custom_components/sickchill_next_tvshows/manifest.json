@@ -1,0 +1,8 @@
+{
+  "domain": "sickchill_next_tvshows",
+  "name": "sickchill_next_tvshows",
+  "documentation": "",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@youdroid"]
+}
