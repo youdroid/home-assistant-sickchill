@@ -11,7 +11,7 @@ from homeassistant.const import *
 from homeassistant.helpers.entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
-DEFAULT_NAME = "sickchill_next_tvshows"
+DEFAULT_NAME = "sickchill"
 DEFAULT_HOST = "localhost"
 DEFAULT_PROTO = "http"
 DEFAULT_PORT = "8081"

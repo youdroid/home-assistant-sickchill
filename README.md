@@ -3,7 +3,7 @@
 Home Assistant component to feed Upcoming Media Card with SickChill's wanted media.
 
 ## Installation
-1. Install this component by copying [these files](https://github.com/youdroid/home-assistant-sickchill/tree/Feature_localPoster/custom_components/sickchill_next_tvshows) to `custom_components/sickchill_next_tvshows/`.
+1. Install this component by copying [these files](https://github.com/youdroid/home-assistant-sickchill/tree/master/custom_components/sickchill) to `custom_components/sickchill/`.
 2. Install the card: [Upcoming Media Card](https://github.com/custom-cards/upcoming-media-card)
 3. Add the code to your `configuration.yaml` using the config options below.
 4. Add the card code to your `ui-lovelace.yaml`. 
@@ -14,12 +14,12 @@ Home Assistant component to feed Upcoming Media Card with SickChill's wanted med
 | key | default | required | description
 | --- | --- | --- | ---
 | token | | yes | Your SickChill token (Config > General > Interface > API Key > Generate)
-| name | sickchill_next_tvshows | no | Name of the sensor.
+| name | sickchill | no | Name of the sensor.
 | host | localhost | no | The host which SickChill is running on.
 | port | 8081 | no | The port which SickChill is running on.
 
 #### Caution
-By default this addon automatically downloads images (poster and fanart) from SickChill to your /www/custom-lovelace/sickchill_next_tvshows/ directory. 
+By default this addon automatically downloads images (poster and fanart) from SickChill to your /www/custom-lovelace/sickchill/ directory. 
 If you change the sensor's name, the directory will changes name too. (Example : /www/custom-lovelace/[SENSOR NAME]/)  
 The directory is automatically created. When your show is over all posters and fanarts are removed automatically from the directory.  
 I made this choice because if I pick up images directly from Sickchill which use http protocol and no https (my situation and may be many others), web browser redirect http flux to https and it can't works correctly. So I decided to dowload them.  
@@ -30,12 +30,12 @@ I made this choice because if I pick up images directly from Sickchill which use
 ### Example for minimal config needed in configuration.yaml:
 ```yaml
     sensor:
-    - platform: sickchill_next_tvshows
+    - platform: sickchill
       token: YOUR_SICKCHILL_TOKEN
 ```
 ### Example for ui-lovelace.yaml:
 ```yaml
     - type: custom:upcoming-media-card
-      entity: sensor.sickchill_next_tvshows
+      entity: sensor.sickchill
       title: TV Shows Wanted
 ```

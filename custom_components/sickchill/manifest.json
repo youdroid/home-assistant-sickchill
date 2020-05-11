@@ -1,6 +1,6 @@
 {
-  "domain": "sickchill_next_tvshows",
-  "name": "sickchill_next_tvshows",
+  "domain": "sickchill",
+  "name": "SickChill Next TV Shows",
   "documentation": "https://github.com/youdroid/home-assistant-sickchill",
   "requirements": [],
   "dependencies": [],
