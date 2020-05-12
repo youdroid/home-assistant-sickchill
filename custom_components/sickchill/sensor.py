@@ -98,7 +98,7 @@ class SickChillSensor(Entity):
                 card_items['studio'] = shows[id]["network"]
                 all_season_show = self.get_infos(self.protocol, self.host, self.port, self.token,
                                                  'show.seasons&indexerid=' + id)
-                nb_seasons = len(all_season_show['data'])
+                nb_seasons = len(all_season_show['data']) - 1
                 last_season = all_season_show['data'][str(nb_seasons)]
                 next_episode = "S"
                 for episode in last_season:
