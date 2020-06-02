@@ -17,6 +17,7 @@ Home Assistant component to feed Upcoming Media Card with SickChill's wanted med
 | name | sickchill | no | Name of the sensor.
 | host | localhost | no | The host which SickChill is running on.
 | port | 8081 | no | The port which SickChill is running on.
+| protocol | http | no | The HTTP protocol used by SickChill.
 
 #### Caution
 By default this addon automatically downloads images (poster and fanart) from SickChill to your /www/custom-lovelace/sickchill/ directory. 
