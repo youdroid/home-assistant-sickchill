@@ -120,6 +120,7 @@ class SickChillSensor(Entity):
                         else:
                             next_episode += "E" + str(episode)
                         card_items['number'] = next_episode
+                        break
                 card_json.append(card_items)
         attributes['data'] = json.dumps(card_json)
         self._state = ifs_tv_shows["result"]
