@@ -1,3 +1,6 @@
+![Validate with hassfest](https://github.com/youdroid/home-assistant-sickchill/workflows/Validate%20with%20hassfest/badge.svg)
+![Validate](https://github.com/youdroid/home-assistant-sickchill/workflows/Validate/badge.svg)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 # SickChill Wanted Tv Shows
 
 Home Assistant component to feed Upcoming Media Card with SickChill's wanted media.
