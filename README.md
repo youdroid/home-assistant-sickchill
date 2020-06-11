@@ -1,6 +1,9 @@
 ![Validate with hassfest](https://github.com/youdroid/home-assistant-sickchill/workflows/Validate%20with%20hassfest/badge.svg)
 ![Validate](https://github.com/youdroid/home-assistant-sickchill/workflows/Validate/badge.svg)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/youdroid/home-assistant-sickchill)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/youdroid/home-assistant-sickchill)
+![GitHub maintainer](https://img.shields.io/badge/maintainer-%40youdroid-blue)
 # SickChill Wanted Tv Shows
 
 Home Assistant component to feed Upcoming Media Card with SickChill's wanted media.
@@ -21,8 +24,9 @@ Home Assistant component to feed Upcoming Media Card with SickChill's wanted med
 | host | localhost | no | The host which SickChill is running on.
 | port | 8081 | no | The port which SickChill is running on.
 | protocol | http | no | The HTTP protocol used by SickChill.
+| sort | name | no | Parameter to sort TV Shows **[date, name]**
 
-#### Caution
+#### :warning: Caution
 By default this addon automatically downloads images (poster and fanart) from SickChill to your /www/custom-lovelace/sickchill/ directory. 
 If you change the sensor's name, the directory will changes name too. (Example : /www/custom-lovelace/[SENSOR NAME]/)  
 The directory is automatically created. When your show is over all posters and fanarts are removed automatically from the directory.  

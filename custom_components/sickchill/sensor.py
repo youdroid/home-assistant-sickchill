@@ -15,13 +15,16 @@ DEFAULT_NAME = "sickchill"
 DEFAULT_HOST = "localhost"
 DEFAULT_PROTO = "http"
 DEFAULT_PORT = "8081"
+DEFAULT_SORTING = "name"
+CONF_SORTING = "sort"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TOKEN): cv.string,
     vol.Optional(CONF_PORT, default=DEFAULT_PORT): cv.string,
     vol.Optional(CONF_HOST, default=DEFAULT_HOST): cv.string,
     vol.Optional(CONF_PROTOCOL, default=DEFAULT_PROTO): cv.string,
-    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string
+    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+    vol.Optional(CONF_SORTING, default=DEFAULT_SORTING): cv.string
 })
 
 
@@ -41,6 +44,7 @@ class SickChillSensor(Entity):
         self.port = config.get(CONF_PORT)
         self.base_dir = str(hass.config.path()) + '/'
         self.data = None
+        self.sort = config.get(CONF_SORTING)
 
     @property
     def name(self):
@@ -60,7 +64,7 @@ class SickChillSensor(Entity):
     def update(self):
         attributes = {}
         card_json = []
-
+        card_shows = []
         init = {}
         """Initialized JSON Object"""
         init['title_default'] = '$title'
@@ -121,7 +125,10 @@ class SickChillSensor(Entity):
                             next_episode += "E" + str(episode)
                         card_items['number'] = next_episode
                         break
-                card_json.append(card_items)
+                card_shows.append(card_items)
+        if self.sort == "date":
+            card_shows.sort(key=lambda x: x.get('airdate'))
+        card_json = card_json + card_shows
         attributes['data'] = json.dumps(card_json)
         self._state = ifs_tv_shows["result"]
         self.data = attributes
