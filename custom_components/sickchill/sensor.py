@@ -17,6 +17,8 @@ DEFAULT_PROTO = "http"
 DEFAULT_PORT = "8081"
 DEFAULT_SORTING = "name"
 CONF_SORTING = "sort"
+CONF_WEB_ROOT = "webroot"
+DEFAULT_WEB_ROOT = ""
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TOKEN): cv.string,
@@ -24,7 +26,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_HOST, default=DEFAULT_HOST): cv.string,
     vol.Optional(CONF_PROTOCOL, default=DEFAULT_PROTO): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-    vol.Optional(CONF_SORTING, default=DEFAULT_SORTING): cv.string
+    vol.Optional(CONF_SORTING, default=DEFAULT_SORTING): cv.string,
+    vol.Optional(CONF_WEB_ROOT, default=DEFAULT_WEB_ROOT): cv.string
 })
 
 
@@ -45,6 +48,7 @@ class SickChillSensor(Entity):
         self.base_dir = str(hass.config.path()) + '/'
         self.data = None
         self.sort = config.get(CONF_SORTING)
+        self.web_root = config.get(CONF_WEB_ROOT)
 
     @property
     def name(self):
@@ -75,7 +79,7 @@ class SickChillSensor(Entity):
         init['icon'] = 'mdi:eye-off'
         card_json.append(init)
 
-        ifs_tv_shows = self.get_infos(self.protocol, self.host, self.port, self.token, 'shows')
+        ifs_tv_shows = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root, 'shows')
         shows = ifs_tv_shows['data']
 
         directory = "{0}/www/custom-lovelace/{1}/images/".format(self.base_dir, self._name)
@@ -100,7 +104,7 @@ class SickChillSensor(Entity):
                 card_items["fanart"] = self.add_fanart(lst_images, directory, fanart, id, card_items)
 
                 card_items['studio'] = shows[id]["network"]
-                all_season_show = self.get_infos(self.protocol, self.host, self.port, self.token,
+                all_season_show = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
                                                  'show.seasons&indexerid=' + id)
                 try:
                     all_season_show['data']['0']
@@ -134,9 +138,9 @@ class SickChillSensor(Entity):
         self.data = attributes
         self.delete_old_tvshows(lst_images, directory)
 
-    def get_infos(self, proto, host, port, token, cmd):
-        url = "{0}://{1}:{2}/api/{3}/?cmd={4}".format(
-            proto, host, port, token, cmd)
+    def get_infos(self, proto, host, port, token, web_root, cmd):
+        url = "{0}://{1}:{2}{3}/api/{4}/?cmd={5}".format(
+            proto, host, port, web_root, token, cmd)
         ifs_movies = requests.get(url).json()
         return ifs_movies
 
@@ -145,7 +149,7 @@ class SickChillSensor(Entity):
             lst_images.remove(poster)
         else:
             img_data = requests.get(
-                "{0}://{1}:{2}/cache/images/thumbnails/{3}.poster.jpg".format(self.protocol, self.host, self.port, id))
+                "{0}://{1}:{2}{3}/cache/images/thumbnails/{4}.poster.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
             if not img_data.status_code.__eq__("200"):
                 _LOGGER.error(card_items["poster"])
                 return ""
@@ -161,7 +165,7 @@ class SickChillSensor(Entity):
             lst_images.remove(fanart)
         else:
             img_data = requests.get(
-                "{0}://{1}:{2}/cache/images/{3}.fanart.jpg".format(self.protocol, self.host, self.port, id))
+                "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
 
             if not img_data.status_code.__eq__("200"):
                 return ""
