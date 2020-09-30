@@ -167,7 +167,7 @@ class SickChillSensor(Entity):
             img_data = requests.get(
                 "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
 
-            if not img_data.status_code.__eq__("200"):
+            if not img_data.status_code.__eq__(200):
                 return ""
 
             try:
