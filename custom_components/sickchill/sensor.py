@@ -104,17 +104,17 @@ class SickChillSensor(Entity):
                 card_items["fanart"] = self.add_fanart(lst_images, directory, fanart, id, card_items)
 
                 card_items['studio'] = shows[id]["network"]
-                all_season_show = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
-                                                 'show.seasons&indexerid=' + id)
-                try:
-                    all_season_show['data']['0']
-                    nb_seasons = len(all_season_show['data']) - 1
 
-                except:
-                    all_season_show['data']['1']
-                    nb_seasons = len(all_season_show['data'])
+                season_list = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
+                                             'show.seasonlist&indexerid=' + id + '&sort=desc')
 
-                last_season = all_season_show['data'][str(nb_seasons)]
+                nb_seasons = season_list["data"][0]
+
+                last_season_detail = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
+                                                    'show.seasons&indexerid=' + id + '&season=' + str(nb_seasons))
+
+                last_season = last_season_detail["data"]
+
                 next_episode = "S"
                 for episode in last_season:
                     if last_season[episode]['airdate'] == shows[id]['next_ep_airdate']:
@@ -149,7 +149,8 @@ class SickChillSensor(Entity):
             lst_images.remove(poster)
         else:
             img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/thumbnails/{4}.poster.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
+                "{0}://{1}:{2}{3}/cache/images/thumbnails/{4}.poster.jpg".format(self.protocol, self.host, self.port,
+                                                                                 self.web_root, id))
             if not img_data.status_code.__eq__("200"):
                 _LOGGER.error(card_items["poster"])
                 return ""
@@ -165,7 +166,8 @@ class SickChillSensor(Entity):
             lst_images.remove(fanart)
         else:
             img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
+                "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port,
+                                                                      self.web_root, id))
 
             if not img_data.status_code.__eq__(200):
                 return ""
