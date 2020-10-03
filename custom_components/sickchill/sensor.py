@@ -144,14 +144,18 @@ class SickChillSensor(Entity):
         ifs_movies = requests.get(url).json()
         return ifs_movies
 
+    def get_img(self, type, id):
+        url = "{0}://{1}:{2}{3}/api/{4}/?cmd=cmd=show.get{5}&indexerid={6}".format(
+            self.proto, self.host, self.ort, self.web_root, self.token, type, id)
+        img = requests.get(url)
+        return img
+
     def add_poster(self, lst_images, directory, poster, id, card_items):
         if poster in lst_images:
             lst_images.remove(poster)
         else:
-            img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/thumbnails/{4}.poster.jpg".format(self.protocol, self.host, self.port,
-                                                                                 self.web_root, id))
-            if not img_data.status_code.__eq__("200"):
+            img_data = self.get_img('poster', id)
+            if not img_data.status_code.__eq__(200):
                 _LOGGER.error(card_items["poster"])
                 return ""
 
@@ -165,11 +169,10 @@ class SickChillSensor(Entity):
         if fanart in lst_images:
             lst_images.remove(fanart)
         else:
-            img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port,
-                                                                      self.web_root, id))
+            img_data = self.get_img('fanart', id)
 
             if not img_data.status_code.__eq__(200):
+                _LOGGER.error(card_items["fanart"])
                 return ""
 
             try:
