@@ -99,9 +99,9 @@ class SickChillSensor(Entity):
                 fanart = "{0}-fanart.jpg".format(id)
                 poster = "{0}-poster.jpg".format(id)
 
-                card_items["poster"] = self.add_poster(lst_images, directory, poster, id, card_items)
+                card_items["poster"] = self.save_img(lst_images, directory, 'poster', poster, id, card_items)
 
-                card_items["fanart"] = self.add_fanart(lst_images, directory, fanart, id, card_items)
+                card_items["fanart"] = self.save_img(lst_images, directory, 'fanart', fanart, id, card_items)
 
                 card_items['studio'] = shows[id]["network"]
 
@@ -146,40 +146,24 @@ class SickChillSensor(Entity):
 
     def get_img(self, type, id):
         url = "{0}://{1}:{2}{3}/api/{4}/?cmd=cmd=show.get{5}&indexerid={6}".format(
-            self.proto, self.host, self.ort, self.web_root, self.token, type, id)
+            self.protocol, self.host, self.port, self.web_root, self.token, type, id)
         img = requests.get(url)
         return img
 
-    def add_poster(self, lst_images, directory, poster, id, card_items):
-        if poster in lst_images:
-            lst_images.remove(poster)
+    def save_img(self, lst_images, directory, type, image, id, card_items):
+        if image in lst_images:
+            lst_images.remove(image)
         else:
-            img_data = self.get_img('poster', id)
+            img_data = self.get_img(type, id)
             if not img_data.status_code.__eq__(200):
-                _LOGGER.error(card_items["poster"])
+                _LOGGER.error('No ' + type + ' found for ' + card_items['title'])
                 return ""
 
             try:
-                open(directory + poster, 'wb').write(img_data.content)
+                open(directory + image, 'wb').write(img_data.content)
             except IOError:
                 _LOGGER.error("Unable to create file.")
-        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, poster)
-
-    def add_fanart(self, lst_images, directory, fanart, id, card_items):
-        if fanart in lst_images:
-            lst_images.remove(fanart)
-        else:
-            img_data = self.get_img('fanart', id)
-
-            if not img_data.status_code.__eq__(200):
-                _LOGGER.error(card_items["fanart"])
-                return ""
-
-            try:
-                open(directory + fanart, 'wb').write(img_data.content)
-            except IOError:
-                _LOGGER.error("Unable to create file.")
-        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, fanart)
+        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, image)
 
     def delete_old_tvshows(self, lst_images, directory):
         for img in lst_images:
