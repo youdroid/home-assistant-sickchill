@@ -19,6 +19,8 @@ DEFAULT_SORTING = "name"
 CONF_SORTING = "sort"
 CONF_WEB_ROOT = "webroot"
 DEFAULT_WEB_ROOT = ""
+CONF_RETURN_VALUE = "json"
+DEFAULT_JSON_RETURN = True
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TOKEN): cv.string,
@@ -27,7 +29,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_PROTOCOL, default=DEFAULT_PROTO): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_SORTING, default=DEFAULT_SORTING): cv.string,
-    vol.Optional(CONF_WEB_ROOT, default=DEFAULT_WEB_ROOT): cv.string
+    vol.Optional(CONF_WEB_ROOT, default=DEFAULT_WEB_ROOT): cv.string,
+    vol.Optional(CONF_RETURN_VALUE, default=DEFAULT_JSON_RETURN): cv.boolean
 })
 
 
@@ -49,6 +52,7 @@ class SickChillSensor(Entity):
         self.data = None
         self.sort = config.get(CONF_SORTING)
         self.web_root = config.get(CONF_WEB_ROOT)
+        self.json = config.get(CONF_RETURN_VALUE)
 
     @property
     def name(self):
@@ -130,10 +134,16 @@ class SickChillSensor(Entity):
                         card_items['number'] = next_episode
                         break
                 card_shows.append(card_items)
+
         if self.sort == "date":
             card_shows.sort(key=lambda x: x.get('airdate'))
         card_json = card_json + card_shows
-        attributes['data'] = json.dumps(card_json)
+
+        if self.json:
+            attributes['data'] = json.dumps(card_json)
+        else:
+            attributes['data'] = card_json
+
         self._state = ifs_tv_shows["result"]
         self.data = attributes
         self.delete_old_tvshows(lst_images, directory)
