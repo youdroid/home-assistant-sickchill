@@ -155,7 +155,7 @@ class SickChillSensor(Entity):
         return ifs_movies
 
     def get_img(self, type, id):
-        url = "{0}://{1}:{2}{3}/api/{4}/?cmd=cmd=show.get{5}&indexerid={6}".format(
+        url = "{0}://{1}:{2}{3}/api/{4}/?cmd=show.get{5}&indexerid={6}".format(
             self.protocol, self.host, self.port, self.web_root, self.token, type, id)
         img = requests.get(url)
         return img
