@@ -19,6 +19,8 @@ DEFAULT_SORTING = "name"
 CONF_SORTING = "sort"
 CONF_WEB_ROOT = "webroot"
 DEFAULT_WEB_ROOT = ""
+CONF_RETURN_VALUE = "json"
+DEFAULT_JSON_RETURN = True
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_TOKEN): cv.string,
@@ -27,7 +29,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_PROTOCOL, default=DEFAULT_PROTO): cv.string,
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_SORTING, default=DEFAULT_SORTING): cv.string,
-    vol.Optional(CONF_WEB_ROOT, default=DEFAULT_WEB_ROOT): cv.string
+    vol.Optional(CONF_WEB_ROOT, default=DEFAULT_WEB_ROOT): cv.string,
+    vol.Optional(CONF_RETURN_VALUE, default=DEFAULT_JSON_RETURN): cv.boolean
 })
 
 
@@ -49,6 +52,7 @@ class SickChillSensor(Entity):
         self.data = None
         self.sort = config.get(CONF_SORTING)
         self.web_root = config.get(CONF_WEB_ROOT)
+        self.json = config.get(CONF_RETURN_VALUE)
 
     @property
     def name(self):
@@ -99,22 +103,22 @@ class SickChillSensor(Entity):
                 fanart = "{0}-fanart.jpg".format(id)
                 poster = "{0}-poster.jpg".format(id)
 
-                card_items["poster"] = self.add_poster(lst_images, directory, poster, id, card_items)
+                card_items["poster"] = self.save_img(lst_images, directory, 'poster', poster, id, card_items)
 
-                card_items["fanart"] = self.add_fanart(lst_images, directory, fanart, id, card_items)
+                card_items["fanart"] = self.save_img(lst_images, directory, 'fanart', fanart, id, card_items)
 
                 card_items['studio'] = shows[id]["network"]
-                all_season_show = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
-                                                 'show.seasons&indexerid=' + id)
-                try:
-                    all_season_show['data']['0']
-                    nb_seasons = len(all_season_show['data']) - 1
 
-                except:
-                    all_season_show['data']['1']
-                    nb_seasons = len(all_season_show['data'])
+                season_list = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
+                                             'show.seasonlist&indexerid=' + id + '&sort=desc')
 
-                last_season = all_season_show['data'][str(nb_seasons)]
+                nb_seasons = season_list["data"][0]
+
+                last_season_detail = self.get_infos(self.protocol, self.host, self.port, self.token, self.web_root,
+                                                    'show.seasons&indexerid=' + id + '&season=' + str(nb_seasons))
+
+                last_season = last_season_detail["data"]
+
                 next_episode = "S"
                 for episode in last_season:
                     if last_season[episode]['airdate'] == shows[id]['next_ep_airdate']:
@@ -130,10 +134,16 @@ class SickChillSensor(Entity):
                         card_items['number'] = next_episode
                         break
                 card_shows.append(card_items)
+
         if self.sort == "date":
             card_shows.sort(key=lambda x: x.get('airdate'))
         card_json = card_json + card_shows
-        attributes['data'] = json.dumps(card_json)
+
+        if self.json:
+            attributes['data'] = json.dumps(card_json)
+        else:
+            attributes['data'] = card_json
+
         self._state = ifs_tv_shows["result"]
         self.data = attributes
         self.delete_old_tvshows(lst_images, directory)
@@ -144,37 +154,26 @@ class SickChillSensor(Entity):
         ifs_movies = requests.get(url).json()
         return ifs_movies
 
-    def add_poster(self, lst_images, directory, poster, id, card_items):
-        if poster in lst_images:
-            lst_images.remove(poster)
+    def get_img(self, type, id):
+        url = "{0}://{1}:{2}{3}/api/{4}/?cmd=cmd=show.get{5}&indexerid={6}".format(
+            self.protocol, self.host, self.port, self.web_root, self.token, type, id)
+        img = requests.get(url)
+        return img
+
+    def save_img(self, lst_images, directory, type, image, id, card_items):
+        if image in lst_images:
+            lst_images.remove(image)
         else:
-            img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/thumbnails/{4}.poster.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
-            if not img_data.status_code.__eq__("200"):
-                _LOGGER.error(card_items["poster"])
+            img_data = self.get_img(type, id)
+            if not img_data.status_code.__eq__(200):
+                _LOGGER.error('No ' + type + ' found for ' + card_items['title'])
                 return ""
 
             try:
-                open(directory + poster, 'wb').write(img_data.content)
+                open(directory + image, 'wb').write(img_data.content)
             except IOError:
                 _LOGGER.error("Unable to create file.")
-        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, poster)
-
-    def add_fanart(self, lst_images, directory, fanart, id, card_items):
-        if fanart in lst_images:
-            lst_images.remove(fanart)
-        else:
-            img_data = requests.get(
-                "{0}://{1}:{2}{3}/cache/images/{4}.fanart.jpg".format(self.protocol, self.host, self.port, self.web_root, id))
-
-            if not img_data.status_code.__eq__("200"):
-                return ""
-
-            try:
-                open(directory + fanart, 'wb').write(img_data.content)
-            except IOError:
-                _LOGGER.error("Unable to create file.")
-        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, fanart)
+        return "/local/custom-lovelace/{0}/images/{1}".format(self._name, image)
 
     def delete_old_tvshows(self, lst_images, directory):
         for img in lst_images:
